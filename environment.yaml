@@ -1,0 +1,20 @@
+name: monitor
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python>=3.9
+  - pytest
+  - pandas
+  - pyyaml
+  - numpy
+  - matplotlib
+  - pre-commit
+  - google-auth
+  - pip
+  - pip:
+      - orgparse
+      # This package is available via conda forge but sadly only
+      # a very old version thereof.
+      - google-api-python-client==2.48.0
+      - python-telegram-bot
