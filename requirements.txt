@@ -1,0 +1,7 @@
+python-telegram-bot
+orgparse
+pandas
+numpy
+matplotlib
+google.auth
+google-api-python-client
