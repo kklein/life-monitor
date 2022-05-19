@@ -1,4 +1,4 @@
-from monitoring import org, cal, setup, utils
+from monitoring import cal, org, setup, utils
 
 _FIRST_YEAR = 2020
 
@@ -60,7 +60,9 @@ def gcal(interval: utils.TriggerInterval):
         tmpdir = setup.get_tmpdir()
         image_paths = [
             image_function(df)
-            for image_function in cal.image_function_registry(sport, interval, path=tmpdir)
+            for image_function in cal.image_function_registry(
+                sport, interval, path=tmpdir
+            )
         ]
         print(f"Generated images for {interval.value} {sport.value}: {image_paths}.")
 
