@@ -340,7 +340,7 @@ def streak(df, sport: utils.Sport, duration=3):
     date_last_event = _current_date(df).date()
     has_streak = True
     # TODO: Consider shifting this to data processing step.
-    dates = [date for date in df["date"].date()]
+    dates = [date for date in df["date"].dt.date]
     for offset in range(1, duration):
         if date_last_event - datetime.timedelta(days=offset) not in dates:
             has_streak = False
