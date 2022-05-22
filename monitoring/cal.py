@@ -157,7 +157,7 @@ def distance_weekly_vs_year(df, sport: utils.Sport, quantile_threshold=0.6):
     )
 
     if weekly > reference_value:
-        return "Weekly average {sport.value} volume was considerably higher than usual in past 12 months!"
+        return f"Weekly average {sport.value} volume was considerably higher than usual in past 12 months!"
 
 
 def frequency_weekly_vs_year(df, sport: utils.Sport, quantile_threshold=0.6):
@@ -237,7 +237,7 @@ def distance_mod_interval(df, sport: utils.Sport, interval=100):
     if (
         threshold := (yearly_distance_after_last_event // interval) * interval
     ) > yearly_distance_before_last_event:
-        return f"You just croseed {threshold}km in {sport.value}. Congrats!"
+        return f"You just crossed {int(threshold)}km in {sport.value}. Congrats!"
 
 
 def distance_previous_years_month(df, sport: utils.Sport):
