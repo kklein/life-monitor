@@ -364,7 +364,6 @@ def _get_cumulative_day_distances(df_year):
 def plot_cumulative_day_distances(
     df, sport: utils.Sport, path: Path, n_years=2, baselines=[]
 ):
-    # TODO: Consider copying previous value to day d if no activity on day d.
     fig, ax = plt.subplots()
 
     current_year = _current_year(df)
@@ -374,7 +373,9 @@ def plot_cumulative_day_distances(
     }
 
     for year, df_cum in df_cums.items():
-        df_cum.plot(x="day_of_year", y="distance", ax=ax, label=str(year))
+        df_cum.plot(
+            x="day_of_year", y="distance", ax=ax, label=str(year), drawstyle="steps"
+        )
 
     for baseline in baselines:
         x = list(range(365))
