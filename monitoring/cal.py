@@ -374,7 +374,11 @@ def plot_cumulative_day_distances(
 
     for year, df_cum in df_cums.items():
         df_cum.plot(
-            x="day_of_year", y="distance", ax=ax, label=str(year), drawstyle="steps"
+            x="day_of_year",
+            y="distance",
+            ax=ax,
+            label=str(year),
+            drawstyle="steps-post",
         )
 
     for baseline in baselines:
