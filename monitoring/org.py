@@ -53,6 +53,7 @@ def load_data(
 
 def process_data(df: pd.DataFrame) -> pd.DataFrame:
     df = df.replace("x", np.nan)
+    df = df.replace("-1", np.nan)
     # Float allows for nans, int not.
     df = df.astype(np.float16)
     df = df.assign(week=df["week"].astype(int))
@@ -67,21 +68,107 @@ def _df_last_week(df):
     return df[df["week"] == _this_week() - 1]
 
 
+def _df_last_days(df, n_days):
+    # There is no straightforward mapping between the current date
+    # and the day index.
+    return df.dropna().tail(n_days)
+
+
+def _non_corrected_sd(values):
+    """Estimate the non-corrected empirical standard deviation."""
+    if values is None or len(values) == 0:
+        return 0
+    mean = sum(values) / len(values)
+    var = sum((value - mean) ** 2 for value in values) / len(values)
+    return np.sqrt(var)
+
+
+def _get_operator(is_negative, is_inverted):
+    """Obtain the appropriate operator for a monitoring comparison.
+
+    If ``is_negative``, the comparison attempts to assess whether a 'negative'
+    condition is satisfied. An example of that would be to have slept badly.
+    If ``is_inverted``, the values to be assess are interpreted as better when
+    smaller in value.
+    """
+    if is_negative:
+        return operator.lt if not is_inverted else operator.gt
+    return operator.gt if not is_inverted else operator.lt
+
+
+def _has_daily_message(values, sigma, mean, n_days, is_negative, is_inverted):
+    op = _get_operator(is_negative, is_inverted)
+    if n_days == 1:
+        threshold = mean - 2 * sigma if is_negative else mean + 2 * sigma
+    elif n_days == 2:
+        threshold = mean - sigma if is_negative else mean + sigma
+    else:
+        raise ValueError(f"Unexpected number of days: {n_days}.")
+    return op(values, threshold).all()
+
+
+def _has_weekly_message(global_values, local_mean, quantile, is_negative, is_inverted):
+    threshold = global_values.quantile(q=quantile)
+    op = _get_operator(is_negative, is_inverted)
+    return op(local_mean, threshold)
+
+
 def messages_this_week(
     df, columns: list[str] = PROPERTIES, lower_quantile=0.4, upper_quantile=0.6
 ) -> list[str]:
     df_this_week = _df_this_week(df)
     messages = []
     for column in columns:
-        lower_threshold = df[column].quantile(q=lower_quantile)
-        upper_threshold = df[column].quantile(q=upper_quantile)
-        mean = df_this_week[column].mean()
-        negative_operator = operator.lt if column != "Stress" else operator.gt
-        positive_operator = operator.gt if column != "Stress" else operator.lt
-        if negative_operator(mean, lower_threshold):
+        local_mean = df_this_week[column].mean()
+        is_inverted = column == "Stress"
+        if _has_weekly_message(
+            df[column],
+            local_mean,
+            quantile=lower_quantile,
+            is_inverted=is_inverted,
+            is_negative=True,
+        ):
             messages.append(f"Oh. {column} was not so great this week.")
-        if positive_operator(mean, upper_threshold):
+        if _has_weekly_message(
+            df[column],
+            local_mean,
+            quantile=upper_quantile,
+            is_inverted=is_inverted,
+            is_negative=False,
+        ):
             messages.append(f"Jeez! {column} was truly splendid this week.")
+    return messages
+
+
+def messages_this_day(df, columns: list[str] = PROPERTIES) -> list[str]:
+    messages = []
+    for column in columns:
+        non_nan_values = df[column].dropna()
+        global_sigma = _non_corrected_sd(non_nan_values)
+        global_mean = sum(non_nan_values) / len(non_nan_values)
+        is_inverted = column == "Stress"
+        if _has_daily_message(
+            _df_last_days(df, n_days=1)[column],
+            global_sigma,
+            global_mean,
+            n_days=1,
+            is_negative=True,
+            is_inverted=is_inverted,
+        ):
+            messages.append(
+                f"Hmm. {column} looked not good yesterday. What can be done?"
+            )
+        if _has_daily_message(
+            _df_last_days(df, n_days=2)[column],
+            global_sigma,
+            global_mean,
+            n_days=2,
+            is_negative=True,
+            is_inverted=is_inverted,
+        ):
+            messages.append(
+                f"{column} has looked problematic over the past two days. Take it easy pal."
+            )
     return messages
 
 

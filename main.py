@@ -3,15 +3,21 @@ from monitoring import cal, org, setup, utils
 _FIRST_YEAR = 2020
 
 
-def org_log():
+def org_log(interval: utils.TriggerInterval):
     weeks_dir = setup.create_and_get_week_dir()
     df = org.load_data(week_root=weeks_dir, first_weekday_index=3)
     df = org.process_data(df)
 
-    messages = org.messages_this_week(df)
-    print(f"Generated messages: {messages}.")
+    if interval == utils.TriggerInterval.weekly:
+        messages = org.messages_this_week(df)
+        image_paths = org.images_this_week(df, path=weeks_dir)
+    elif interval == utils.TriggerInterval.daily:
+        messages = org.messages_this_day(df)
+        image_paths = []
+    else:
+        raise ValueError(f"Unexpected TriggerInterval for org_log: {interval}.")
 
-    image_paths = org.images_this_week(df, path=weeks_dir)
+    print(f"Generated messages: {messages}.")
     print(f"Generated images: {image_paths}.")
 
     bot = setup.get_bot()
@@ -72,9 +78,11 @@ def gcal(interval: utils.TriggerInterval):
 
 def main(request, context):
     kind = utils.parse_payload(request)
-    if kind == "org":
-        org_log()
-    elif kind == "calendar":
+    if kind == "org_daily":
+        org_log(utils.TriggerInterval.daily)
+    if kind == "org_weekly":
+        org_log(utils.TriggerInterval.weekly)
+    elif kind == "calendar_daily":
         gcal(utils.TriggerInterval.daily)
     elif kind == "calendar_weekly":
         gcal(utils.TriggerInterval.weekly)
