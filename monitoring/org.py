@@ -91,19 +91,34 @@ def _get_operator(is_negative, is_inverted):
     If ``is_inverted``, the values to be assess are interpreted as better when
     smaller in value.
     """
-    if is_negative:
-        return operator.lt if not is_inverted else operator.gt
-    return operator.gt if not is_inverted else operator.lt
+    if is_negative != is_inverted:
+        return operator.le
+    return operator.ge
+
+
+def _get_threshold(is_negative, is_inverted, mean, deviation):
+    """Obtain the appropriate threshold for a monitoring comparison.
+
+    If ``is_negative``, the comparison attempts to assess whether a 'negative'
+    condition is satisfied. An example of that would be to have slept badly.
+    If ``is_inverted``, the values to be assess are interpreted as better when
+    smaller in value.
+
+    If either ``is_negative`` or ``is_inverted``, we define a lower bound.
+    Otherwise, we define an upper bound.
+    """
+    return mean + (-1) ** (is_negative + is_inverted) * deviation
 
 
 def _has_daily_message(values, sigma, mean, n_days, is_negative, is_inverted):
     op = _get_operator(is_negative, is_inverted)
     if n_days == 1:
-        threshold = mean - 2 * sigma if is_negative else mean + 2 * sigma
+        deviation = 2 * sigma
     elif n_days == 2:
-        threshold = mean - sigma if is_negative else mean + sigma
+        deviation = sigma
     else:
         raise ValueError(f"Unexpected number of days: {n_days}.")
+    threshold = _get_threshold(is_negative, is_inverted, mean, deviation)
     return op(values, threshold).all()
 
 
