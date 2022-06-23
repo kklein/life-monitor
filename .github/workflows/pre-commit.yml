@@ -33,7 +33,7 @@ jobs:
           miniforge-variant: Mambaforge
           miniforge-version: 4.11.0-2
           use-mamba: true
-          environment-file: environment.yml
+          environment-file: environment.yaml
           activate-environment: monitor
       - name: Execute tests
         run: |
