@@ -1,0 +1,38 @@
+name: pre-commit
+
+on: [push]
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.0
+
+  unit-test:
+    name: "Unit tests: Python ${{ matrix.PYTHON_VERSION }}"
+    runs-on: ubuntu-latest
+    env:
+      CI: True
+    strategy:
+      fail-fast: true
+      matrix:
+        PYTHON_VERSION: ['3.10']
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.PYTHON_VERSION }}
+          miniforge-variant: Mambaforge
+          miniforge-version: 4.11.0-2
+          use-mamba: true
+          environment-file: environment.yaml
+          activate-environment: monitor
+      - name: Execute tests
+        shell: bash -l {0}
+        run: |
+          pytest tests
