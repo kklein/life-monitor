@@ -36,5 +36,6 @@ jobs:
           environment-file: environment.yaml
           activate-environment: monitor
       - name: Execute tests
+        shell: bash -l {0}
         run: |
           pytest tests/unit
