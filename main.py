@@ -80,7 +80,7 @@ def main(request, context):
     kind = utils.parse_payload(request)
     if kind == "org_daily":
         org_log(utils.TriggerInterval.daily)
-    if kind == "org_weekly":
+    elif kind == "org_weekly":
         org_log(utils.TriggerInterval.weekly)
     elif kind == "calendar_daily":
         gcal(utils.TriggerInterval.daily)
