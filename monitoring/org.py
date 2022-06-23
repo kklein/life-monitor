@@ -2,10 +2,12 @@ import datetime
 import operator
 from math import ceil
 from pathlib import Path
+from typing import Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import pydantic
 from orgparse import load
 
 WEEK_ROOT = Path("/Users/kevin/org/weeks")
@@ -31,6 +33,28 @@ def _find_max_week(path: Path):
     return max(int(file.name.split(".org")[0]) for file in path.iterdir())
 
 
+IntInput = Union[pydantic.conint(ge=0, le=5), pydantic.constr(regex="x")]  # noqa: F821
+
+
+class DayData(pydantic.BaseModel):
+    Sleep: IntInput
+    Exercise: IntInput
+    Happiness: IntInput
+    Wellbeing: IntInput
+    Eating: IntInput
+    Stress: IntInput
+    Fasting: Union[pydantic.confloat(ge=-1), pydantic.constr(regex="x")]  # noqa: F821
+    week: int
+
+
+def _validate_data(values: dict):
+    for key, value in values.items():
+        if not isinstance(key, int) or key < 0 or key > 366:
+            raise ValueError(f"Encountered an unexpected day-key: {key}")
+        values[key] = dict(DayData(**value))
+    return values
+
+
 def load_data(
     max_week: int = None,
     week_root: Path = WEEK_ROOT,
@@ -46,7 +70,7 @@ def load_data(
             day_values.update({"week": week})
             day = (week - 1) * 7 + (child_index - first_weekday_index)
             values[day] = day_values
-
+    values = _validate_data(values)
     df = pd.DataFrame(values)
     return df.transpose()
 
