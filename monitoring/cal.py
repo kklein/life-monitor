@@ -6,9 +6,11 @@
 import datetime
 from functools import partial
 from pathlib import Path
+from typing import Union
 
 import matplotlib.pyplot as plt
 import pandas as pd
+import pydantic
 
 from . import utils
 
@@ -105,17 +107,10 @@ def has_time_relevant_event(
 
 
 def get_dataframe(events):
-    raw_data = {
-        "date_string": map(lambda event: event["start"]["dateTime"], events),
-        "distance": map(
-            lambda event: event.get("description", "").split("km")[0], events
-        ),
-        "title": map(lambda event: event["summary"], events),
-    }
-    df = pd.DataFrame(data=raw_data)
+    df = pd.DataFrame(data=prune_events(events))
     if len(df) == 0:
         return df
-    df["date"] = pd.to_datetime(df["date_string"].str[:16])
+    df["date"] = pd.to_datetime(df["date_string"], utc=True)
     df["day"] = df["date"].dt.day
     df["week"] = df["date"].dt.isocalendar().week
     df["month"] = df["date"].dt.month
@@ -125,9 +120,36 @@ def get_dataframe(events):
     return df
 
 
+class EventDatum(pydantic.BaseModel):
+    date_string: datetime.datetime
+    distance: Union[pydantic.confloat(ge=0.5, le=250), None]
+    title: str
+
+
+def _parse_data(raw_data):
+    parsed_data = pydantic.parse_obj_as(list[EventDatum], raw_data)
+    return [dict(event) for event in parsed_data]
+
+
+def prune_events(events):
+    """Prune event rows as to only include certain columns."""
+    raw_data = [
+        {
+            "date_string": event["start"]["dateTime"],
+            "distance": event["description"].split("km")[0]
+            if "description" in event
+            else None,
+            "title": event["summary"],
+        }
+        for event in events
+    ]
+    return _parse_data(raw_data)
+
+
 def get_filtered_events(
     service, timestamp_start, timestamp_end, filter_kind, filter_value
 ):
+    """Filter row events to only include certain event kinds."""
     events = get_events(service, timestamp_start, timestamp_end)
     if filter_kind == "summary":
         filter_function = _get_summary_filter(summary=filter_value)
