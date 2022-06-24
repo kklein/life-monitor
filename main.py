@@ -44,7 +44,7 @@ def gcal(interval: utils.TriggerInterval):
                 start,
                 end,
                 "summary",
-                filter_value=sport.value,
+                filter_value=sport,
             )
         )
 

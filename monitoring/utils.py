@@ -7,10 +7,13 @@ from enum import Enum
 class Sport(Enum):
     running = "running"
     cycling = "cycling"
-    gym = "gym"
     swimming = "swimming"
     hiking = "hiking"
     cross_country_skiing = "cross-country skiing"
+    gym = "gym"
+    gym_ub = "gym: ub"
+    gym_lb = "gym: lb"
+    gym_c = "gym: c"
 
 
 class TriggerInterval(Enum):

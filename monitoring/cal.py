@@ -42,22 +42,22 @@ def _distance_last_event(df):
     return df[df["date"] == _current_date(df)]["distance"].sum()
 
 
-def _get_summary_filter(summary):
+def _get_summary_filter(sport: utils.Sport):
     def summary_filter(event):
-        # DIRTY HACK
-        if summary == utils.Sport.gym.value:
-            return (
-                "summary" in event
-                # Gym events can come as 'Gym', 'Gym:ub', 'Gym:lb', etc.
-                and event["summary"].lower().startswith(summary)
-            )
+        # If generic 'gym' is given, we want to select any kind of gym event.
+        if sport == utils.Sport.gym:
+            return "summary" in event and event["summary"].lower() in [
+                utils.Sport.gym.value,
+                utils.Sport.gym_c.value,
+                utils.Sport.gym_lb.value,
+                utils.Sport.gym_ub.value,
+            ]
         return (
             "summary" in event
-            and "description" in event
             # Running and Cycling events are excatly called as just spelled.
             # Some social, non-desired events are called 'Running w/ friend'
             # and should not be considered.
-            and event["summary"].lower() == summary
+            and event["summary"].lower() == sport.value
         )
 
     return summary_filter
@@ -122,8 +122,14 @@ def get_dataframe(events):
 
 class EventDatum(pydantic.BaseModel):
     date_string: datetime.datetime
-    distance: Union[pydantic.confloat(ge=0.5, le=250), None]
-    title: str
+    # Swimming distance can be very short, cycling distance very long.
+    distance: Union[pydantic.confloat(ge=0.1, le=250), None]
+    title: utils.Sport
+
+    # This is necessary to prevent the entire enum to be stored instead of its value.
+    # https://stackoverflow.com/questions/65209934/pydantic-enum-field-does-not-get-converted-to-string
+    class Config:
+        use_enum_values = True
 
 
 def _parse_data(raw_data):
@@ -139,7 +145,7 @@ def prune_events(events):
             "distance": event["description"].split("km")[0]
             if "description" in event
             else None,
-            "title": event["summary"],
+            "title": event["summary"].lower(),
         }
         for event in events
     ]
@@ -152,9 +158,11 @@ def get_filtered_events(
     """Filter row events to only include certain event kinds."""
     events = get_events(service, timestamp_start, timestamp_end)
     if filter_kind == "summary":
-        filter_function = _get_summary_filter(summary=filter_value)
+        filter_function = _get_summary_filter(sport=filter_value)
     elif filter_kind == "color":
         filter_function = _get_color_filter(color=filter_value)
+    else:
+        raise ValueError(f"Unexpected filter_kind: {filter_kind}.")
     return list(filter(filter_function, events))
 
 
