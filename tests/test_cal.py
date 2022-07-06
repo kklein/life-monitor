@@ -67,6 +67,26 @@ def events():
             "end": {"dateTime": "2020-01-04T10:00:00+01:00", "timeZone": "Europe/Rome"},
             "eventType": "default",
         },
+        *[
+            {
+                "kind": "calendar#event",
+                "created": f"2020-01-0{day}T21:34:53.000Z",
+                "updated": f"2020-01-0{day}T21:34:53.480Z",
+                "summary": "Running",
+                "description": "14.91 km",
+                "colorId": "4",
+                "start": {
+                    "dateTime": f"2020-01-{day}T08:30:00+01:00",
+                    "timeZone": "Europe/Rome",
+                },
+                "end": {
+                    "dateTime": f"2020-01-0{day}T10:00:00+01:00",
+                    "timeZone": "Europe/Rome",
+                },
+                "eventType": "default",
+            }
+            for day in range(5, 8)
+        ],
     ]
 
 
@@ -77,7 +97,7 @@ def test_smoke_get_getdataframe(events):
 @pytest.mark.parametrize(
     "data",
     [
-        (utils.Sport.running, 1),
+        (utils.Sport.running, 4),
         (utils.Sport.gym, 2),
         (utils.Sport.gym_ub, 1),
         (utils.Sport.cycling, 0),
@@ -149,3 +169,15 @@ def test_prune_events_distance(events, sport):
 def test_prune_events_failure(flawed_event):
     with pytest.raises(Exception):
         cal.prune_events([flawed_event])
+
+
+@pytest.mark.parametrize("data", [(i, True) for i in range(1, 4)] + [(4, False)])
+def test_streak(events, data):
+    sport = utils.Sport.running
+    duration, result = data
+    filter_function = cal._get_summary_filter(sport)
+    running_events = list(filter(filter_function, events))
+    df = cal.get_dataframe(running_events)
+    assert (
+        cal.streak(df, utils.Sport.running, minimal_duration=duration) is not None
+    ) == result

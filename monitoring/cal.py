@@ -366,17 +366,17 @@ def frequency_previous_year(df, sport: utils.Sport):
         return f"You just suprassed the number of {sport.value} activities of last year! Sick!"
 
 
-def streak(df, sport: utils.Sport, duration=3):
+def streak(df, sport: utils.Sport, minimal_duration=3):
     date_last_event = _current_date(df).date()
     has_streak = True
     # TODO: Consider shifting this to data processing step.
     dates = [date for date in df["date"].dt.date]
-    for offset in range(1, duration):
-        if date_last_event - datetime.timedelta(days=offset) not in dates:
-            has_streak = False
-            break
+    n_consecutive_days = 1
+    while date_last_event - datetime.timedelta(days=n_consecutive_days) in dates:
+        n_consecutive_days += 1
+    has_streak = n_consecutive_days >= minimal_duration
     if has_streak:
-        return f"Wow! A streak of {duration} {sport.value} activities!"
+        return f"Wow! A streak of {n_consecutive_days} {sport.value} activities!"
 
 
 def _get_cumulative_day_distances(df_year):
