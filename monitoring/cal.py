@@ -417,8 +417,13 @@ def plot_cumulative_day_distances(
         ax.plot(x, y, label=f"{baseline} km")
 
     ax.legend()
-    ax.set_xlim(1, df_cums[current_year]["day_of_year"].max())
-    ax.set_ylim(0, df_cums[current_year]["distance"].max())
+    x_max = df_cums[current_year]["day_of_year"].max()
+    y_max = max(
+        df_cums[year][df_cums[year]["day_of_year"] <= x_max]["distance"].max()
+        for year in range(current_year, current_year - n_years - 1, -1)
+    )
+    ax.set_xlim(1, x_max)
+    ax.set_ylim(0, y_max)
     ax.set_ylabel(f"cumulative distance in {sport.value} [km]")
 
     image_path = path / f"cumulative_{sport.value}.png"
