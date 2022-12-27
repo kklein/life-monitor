@@ -380,15 +380,16 @@ def streak(df, sport: utils.Sport, minimal_duration=3):
 
 
 def _get_cumulative_day_distances(df_year):
-    df_year["day_of_year"] = df_year["date"].dt.dayofyear
-    df_year = (
-        df_year[["distance", "day_of_year"]]
+    df = df_year.copy()
+    df.loc[:, "day_of_year"] = df["date"].dt.dayofyear
+    df = (
+        df[["distance", "day_of_year"]]
         .groupby("day_of_year")
         .agg({"distance": "sum"})
         .reset_index()
     )
-    df_year = df_year.set_index("day_of_year").cumsum().reset_index()
-    return df_year
+    df = df.set_index("day_of_year").cumsum().reset_index()
+    return df
 
 
 def plot_cumulative_day_distances(
