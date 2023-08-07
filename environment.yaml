@@ -12,7 +12,8 @@ dependencies:
   - pre-commit
   - google-auth
   - pip
-  - pydantic
+  - pydantic<2.0
+  - git_root
   - pip:
       - orgparse
       # This package is available via conda forge but sadly only
