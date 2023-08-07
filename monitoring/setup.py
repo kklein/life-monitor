@@ -48,7 +48,7 @@ def create_and_get_week_dir() -> Path:
     zip_path = tmpdir / "org.zip"
     urllib.request.urlretrieve(dropbox_url, zip_path)
 
-    weeks_dir = tmpdir / "weeks"
+    weeks_dir = tmpdir / "23-weeks"
 
     with zipfile.ZipFile(zip_path, "r") as zip_ref:
         zip_ref.extractall(weeks_dir)
