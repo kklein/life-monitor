@@ -2,7 +2,7 @@
 
 set -e
 
-gcloud functions deploy f_scheduled --entry-point main --runtime python39 --trigger-resource ping_schedule --trigger-event google.pubsub.topic.publish --timeout 540s --region europe-west3 --env-vars-file env-vars.yaml --project stupid-schedule
+gcloud functions deploy f_scheduled --entry-point main --runtime python311 --trigger-resource ping_schedule --trigger-event google.pubsub.topic.publish --timeout 540s --region europe-west3 --env-vars-file env-vars.yaml --project stupid-schedule
 
 gcloud scheduler jobs delete pubsub_cal_weekly --location europe-west3 --project stupid-schedule
 gcloud scheduler jobs delete pubsub_cal_daily --location europe-west3 --project stupid-schedule
