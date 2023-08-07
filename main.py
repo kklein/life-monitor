@@ -1,6 +1,6 @@
 from monitoring import cal, org, setup, utils
 
-_FIRST_YEAR = 2020
+_FIRST_YEAR = 2021
 
 
 def org_log(interval: utils.TriggerInterval):
