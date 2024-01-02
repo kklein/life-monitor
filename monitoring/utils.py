@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 from enum import Enum
+from math import log
 
 
 class Sport(Enum):
@@ -11,7 +12,9 @@ class Sport(Enum):
     hiking = "hiking"
     cross_country_skiing = "cross-country skiing"
     climbing = "climbing"
+    via_ferrata = "via ferrata"
     tennis = "tennis"
+    padel = "padel"
     snowboarding = "snowboarding"
     snowshoe_hiking = "snowshoe hiking"
     volleyball = "volleyball"
@@ -39,6 +42,10 @@ def first_of_jan_timestamp(year):
     return datetime.datetime(year, 1, 1).isoformat() + "Z"
 
 
+def last_of_dec_timestamp(year):
+    return datetime.datetime(year, 12, 31).isoformat() + "Z"
+
+
 def parse_payload(request):
     # TODO: Use google cloud logging system instead of prints.
     print(f"Received payload: {request}")
@@ -49,3 +56,7 @@ def parse_payload(request):
         print(f"Error decoding JSON: {e}")
         return "JSON Error", 400
     return request_json.get("kind") or "default"
+
+
+def kl(ps, epsilon: float = 0.000001, base: float = 2) -> float:
+    return -sum(p * log(p + epsilon, base) for p in ps)
