@@ -6,3 +6,4 @@ matplotlib
 google.auth
 google-api-python-client
 pydantic==1.10.12
+requests
