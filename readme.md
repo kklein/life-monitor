@@ -4,7 +4,8 @@ I wrote more about this [here](https://kevinkle.in/posts/2022-05-21-life_monitor
 
 Currently, two data sources are used:
 - Google Calendar API for sports events
-- Dropbox for [org files](https://github.com/kklein/org-journal)
+- GitHub for [org files](https://github.com/kklein/org-journal) (used
+  to be Dropbox)
 
 This project is hosted on Google Cloud Platform and relies on scheduled cron jobs.
 
@@ -16,7 +17,13 @@ This project assumes an `env-vars.yaml` with the following structure:
 telegram_token: YOURTOKEN
 telegram_owner_id: YOURTOKEN
 
-dropbox_url: https://www.dropbox.com/sh/YOURFOLDER?raw=1
+github_username: YOUR_USERNAME
+github_repo: YOUR_REPONAME
+# Branch or tag
+github_ref: "master"
+# Valid until 2025/01/03
+github_pat: YOUR_PERSONAL_ACCESS_TOKEN
+
 
 google_refresh_token: YOURREFRESHTOKEN
 google_token_uri: https://oauth2.googleapis.com/token
