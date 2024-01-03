@@ -19,9 +19,7 @@ telegram_owner_id: YOURTOKEN
 
 github_username: YOUR_USERNAME
 github_repo: YOUR_REPONAME
-# Branch or tag
-github_ref: "master"
-# Valid until 2025/01/03
+github_ref: "master" # Branch or tag
 github_pat: YOUR_PERSONAL_ACCESS_TOKEN
 
 

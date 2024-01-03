@@ -42,7 +42,7 @@ def get_tmpdir():
     return Path(tempfile.gettempdir())
 
 
-def create_and_get_week_dir(week: str = "23-weeks") -> Path:
+def create_and_get_week_dir(week: str = "24-weeks") -> Path:
     username = os.environ["github_username"]
     repo = os.environ["github_repo"]
     ref = os.environ["github_ref"]
