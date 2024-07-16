@@ -76,7 +76,7 @@ def events():
                 "description": "14.91 km",
                 "colorId": "4",
                 "start": {
-                    "dateTime": f"2020-01-{day}T08:30:00+01:00",
+                    "dateTime": f"2020-01-0{day}T08:30:00+01:00",
                     "timeZone": "Europe/Rome",
                 },
                 "end": {
@@ -90,7 +90,7 @@ def events():
     ]
 
 
-def test_smoke_get_getdataframe(events):
+def test_get_dataframe_smoke(events):
     cal.get_dataframe(events)
 
 
