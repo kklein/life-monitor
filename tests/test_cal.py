@@ -174,10 +174,9 @@ def test_prune_events_failure(flawed_event):
 @pytest.mark.parametrize("data", [(i, True) for i in range(1, 4)] + [(4, False)])
 def test_streak(events, data):
     sport = utils.Sport.running
-    duration, result = data
+    duration, expected_result = data
     filter_function = cal._get_summary_filter(sport)
     running_events = list(filter(filter_function, events))
     df = cal.get_dataframe(running_events)
-    assert (
-        cal.streak(df, utils.Sport.running, minimal_duration=duration) is not None
-    ) == result
+    actual_result = cal.streak(df, utils.Sport.running, minimal_duration=duration) is not None
+    assert actual_result == expected_result

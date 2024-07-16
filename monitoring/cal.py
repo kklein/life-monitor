@@ -16,19 +16,19 @@ from . import utils
 
 
 def _current_date(df):
-    return df["date"].max()
+    return df.index.max()
 
 
 def _current_year(df):
-    return df[df["date"] == _current_date(df)]["year"].iloc[0]
+    return df[df.index == _current_date(df)]["year"].iloc[0]
 
 
 def _current_month(df):
-    return df[df["date"] == _current_date(df)]["month"].iloc[0]
+    return df[df.index == _current_date(df)]["month"].iloc[0]
 
 
 def _current_week(df):
-    return df[df["date"] == _current_date(df)]["week"].iloc[0]
+    return df[df.index == _current_date(df)]["week"].iloc[0]
 
 
 def _previous_month(df):
@@ -39,7 +39,7 @@ def _previous_month(df):
 
 def _distance_last_event(df):
     # There could be several events on the given date, hence the sum.
-    return df[df["date"] == _current_date(df)]["distance"].sum()
+    return df[df.index == _current_date(df)]["distance"].sum()
 
 
 def _get_summary_filter(sport: utils.Sport):
@@ -106,17 +106,23 @@ def has_time_relevant_event(
     return len(get_time_relevant_events(df, interval, date)) > 0
 
 
-def get_dataframe(events):
+def get_dataframe(events) -> pd.DataFrame:
     df = pd.DataFrame(data=prune_events(events))
     if len(df) == 0:
         return df
+
     df["date"] = pd.to_datetime(df["date_string"], utc=True)
     df["day"] = df["date"].dt.day
     df["week"] = df["date"].dt.isocalendar().week
     df["month"] = df["date"].dt.month
     df["year"] = df["date"].dt.year
-    df["distance"] = pd.to_numeric(df["distance"])
+    df["day_of_year"] = df["date"].dt.dayofyear
     df["hour"] = df["date"].dt.hour
+
+    df = df.set_index("date", drop=True, append=False)
+
+    df["distance"] = pd.to_numeric(df["distance"])
+
     return df
 
 
@@ -178,7 +184,7 @@ def distance_weekly_vs_year(df, sport: utils.Sport, quantile_threshold=0.6):
 
     reference_value = (
         df[
-            (df["date"] >= current_date - pd.Timedelta(days=365))
+            (df.index >= current_date - pd.Timedelta(days=365))
             & ((df["week"] < current_week) | (df["year"] < current_year))
         ]
         .groupby("week")["distance"]
@@ -202,7 +208,7 @@ def frequency_weekly_vs_year(df, sport: utils.Sport, quantile_threshold=0.6):
 
     reference_value = (
         df[
-            (df["date"] >= current_date - pd.Timedelta(days=365))
+            (df.index >= current_date - pd.Timedelta(days=365))
             & ((df["week"] < current_week) | (df["year"] < current_year))
         ]
         .groupby("week")["date_string"]
@@ -259,7 +265,7 @@ def distance_mod_interval(df, sport: utils.Sport, interval=100):
     current_year = _current_year(df)
 
     yearly_distance_before_last_event = df[
-        (df["year"] == current_year) & (df["date"] < date_last_event)
+        (df["year"] == current_year) & (df.index < date_last_event)
     ]["distance"].sum()
     yearly_distance_after_last_event = (
         yearly_distance_before_last_event + _distance_last_event(df)
@@ -283,7 +289,7 @@ def distance_previous_years_month(df, sport: utils.Sport):
     monthly_distance_this_year_before_last_event = df[
         (df["year"] == current_year)
         & (df["month"] == current_month)
-        & (df["date"] < date_last_event)
+        & (df.index < date_last_event)
     ]["distance"].sum()
 
     monthly_distance_this_year_after_last_event = (
@@ -311,7 +317,7 @@ def frequency_previous_years_month(df, sport: utils.Sport):
     monthly_frequency_this_year_before_last_event = df[
         (df["year"] == current_year)
         & (df["month"] == current_month)
-        & (df["date"] < date_last_event)
+        & (df.index < date_last_event)
     ]["date_string"].count()
 
     monthly_frequency_this_year_after_last_event = (
@@ -333,7 +339,7 @@ def distance_previous_year(df, sport: utils.Sport):
 
     yearly_distance_previous_year = df[df["year"] == previous_year]["distance"].sum()
     yearly_distance_this_year_before_last_event = df[
-        (df["year"] == current_year) & (df["date"] < date_last_event)
+        (df["year"] == current_year) & (df.index < date_last_event)
     ]["distance"].sum()
     yearly_distance_this_year_after_last_event = (
         yearly_distance_this_year_before_last_event + _distance_last_event(df)
@@ -353,7 +359,7 @@ def frequency_previous_year(df, sport: utils.Sport):
         "date_string"
     ].count()
     yearly_frequency_this_year_before_last_event = df[
-        (df["year"] == current_year) & (df["date"] < date_last_event)
+        (df["year"] == current_year) & (df.index < date_last_event)
     ]["date_string"].count()
     yearly_frequency_this_year_after_last_event = (
         yearly_frequency_this_year_before_last_event + 1
@@ -369,8 +375,7 @@ def frequency_previous_year(df, sport: utils.Sport):
 def streak(df, sport: utils.Sport, minimal_duration=3):
     date_last_event = _current_date(df).date()
     has_streak = True
-    # TODO: Consider shifting this to data processing step.
-    dates = [date for date in df["date"].dt.date]
+    dates = df.index.date
     n_consecutive_days = 1
     while date_last_event - datetime.timedelta(days=n_consecutive_days) in dates:
         n_consecutive_days += 1
@@ -379,9 +384,8 @@ def streak(df, sport: utils.Sport, minimal_duration=3):
         return f"Wow! A streak of {n_consecutive_days} {sport.value} activities!"
 
 
-def _get_cumulative_day_distances(df_year):
+def _get_cumulative_day_distances(df_year: pd.DataFrame) -> pd.DataFrame:
     df = df_year.copy()
-    df.loc[:, "day_of_year"] = df["date"].dt.dayofyear
     df = (
         df[["distance", "day_of_year"]]
         .groupby("day_of_year")

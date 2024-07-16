@@ -26,6 +26,7 @@ class Sport(Enum):
     gym_ub = "gym: ub"
     gym_lb = "gym: lb"
     gym_c = "gym: c"
+    football = "football"
 
 
 class TriggerInterval(Enum):
