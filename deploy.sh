@@ -2,6 +2,10 @@
 
 set -e
 
+LOCATION="europe-west3"
+PROJECT_NAME="stupid-schedule"
+TOPIC="projects/stupid-schedule/topics/ping_schedule"
+
 # Deploy function.
 
 gcloud functions deploy f_scheduled \
@@ -18,48 +22,48 @@ gcloud functions deploy f_scheduled \
 # Remove existing triggers.
 
 gcloud scheduler jobs delete pubsub_cal_weekly \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs delete pubsub_cal_daily \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs delete pubsub_org_weekly \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs delete pubsub_org_daily \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 # Create new triggers.
 
 gcloud scheduler jobs create pubsub pubsub_cal_weekly \
        --schedule "10 16 * * SUN" \
-       --topic projects/stupid-schedule/topics/ping_schedule \
+       --topic "$TOPIC" \
        --message-body '{"kind": "calendar_weekly"}' \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs create pubsub pubsub_cal_daily \
        --schedule "0 19 * * *" \
-       --topic projects/stupid-schedule/topics/ping_schedule \
+       --topic "$TOPIC" \
        --message-body '{"kind": "calendar_daily"}' \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs create pubsub pubsub_org_weekly \
        --schedule "0 16 * * SUN" \
-       --topic projects/stupid-schedule/topics/ping_schedule \
+       --topic "$TOPIC" \
        --message-body '{"kind": "org_weekly"}' \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
 gcloud scheduler jobs create pubsub pubsub_org_daily \
        --schedule "0 7 * * *" \
-       --topic projects/stupid-schedule/topics/ping_schedule \
+       --topic "$TOPIC" \
        --message-body '{"kind": "org_daily"}' \
-       --location europe-west3 \
-       --project stupid-schedule
+       --location "$LOCATION" \
+       --project "$PROJECT_NAME"
 
