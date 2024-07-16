@@ -12,7 +12,7 @@ dependencies:
   - pre-commit
   - google-auth
   - pip
-  - pydantic<2.0
+  - pydantic>2.0
   - git_root
   - pip:
       - orgparse
