@@ -4,7 +4,8 @@ set -e
 
 LOCATION="europe-west3"
 PROJECT_NAME="stupid-schedule"
-TOPIC="projects/stupid-schedule/topics/ping_schedule"
+TRIGGER="ping_schedule"
+TOPIC="projects/$PROJECT_NAME/topics/$TRIGGER"
 
 # Deploy function.
 
@@ -12,12 +13,12 @@ gcloud functions deploy f_scheduled \
        --gen2 \
        --entry-point main \
        --runtime python311 \
-       --trigger-resource ping_schedule \
+       --trigger-resource "$TRIGGER" \
        --trigger-event google.pubsub.topic.publish \
        --timeout 540s \
-       --region europe-west3 \
+       --region "$LOCATION" \
        --env-vars-file env-vars.yaml \
-       --project stupid-schedule
+       --project "$PROJECT_NAME"
 
 # Remove existing triggers.
 
