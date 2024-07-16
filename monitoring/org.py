@@ -33,7 +33,9 @@ def _find_max_week(path: Path):
     return max(int(file.name.split(".org")[0]) for file in path.iterdir())
 
 
-IntInput = Union[pydantic.conint(ge=0, le=5), pydantic.constr(pattern="x")]  # noqa: F821
+IntInput = Union[
+    pydantic.conint(ge=0, le=5), pydantic.constr(pattern="x")  # noqa: F821
+]
 
 
 class DayData(pydantic.BaseModel):

@@ -178,5 +178,7 @@ def test_streak(events, data):
     filter_function = cal._get_summary_filter(sport)
     running_events = list(filter(filter_function, events))
     df = cal.get_dataframe(running_events)
-    actual_result = cal.streak(df, utils.Sport.running, minimal_duration=duration) is not None
+    actual_result = (
+        cal.streak(df, utils.Sport.running, minimal_duration=duration) is not None
+    )
     assert actual_result == expected_result
