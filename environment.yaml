@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.10.*
+  - python=3.11.*
   - pytest
   - pandas
   - pyyaml
@@ -15,5 +15,5 @@ dependencies:
   - pydantic>2.0
   - git_root
   - google-api-python-client==2.48.0
-  - python-telegram-bot
+  - python-telegram-bot==13.11
   - orgparse
