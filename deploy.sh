@@ -12,6 +12,7 @@ TOPIC="projects/$PROJECT_NAME/topics/$TRIGGER"
 gcloud functions deploy f_scheduled \
        --gen2 \
        --entry-point main \
+       --memory=512 \
        --runtime python311 \
        --trigger-resource "$TRIGGER" \
        --trigger-event google.pubsub.topic.publish \

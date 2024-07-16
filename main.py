@@ -1,6 +1,16 @@
+import asyncio
+
 from monitoring import cal, org, setup, utils
 
 _FIRST_YEAR = 2022
+
+
+async def send_message(bot, chat_id, message):
+    await bot.send_message(chat_id=chat_id, text=message)
+
+
+async def send_photo(bot, chat_id, photo):
+    await bot.send_photo(chat_id=chat_id, photo=photo)
 
 
 def org_log(interval: utils.TriggerInterval):
@@ -24,10 +34,10 @@ def org_log(interval: utils.TriggerInterval):
     owner_id = setup.get_telegram_owner_id()
 
     for message in messages:
-        bot.send_message(chat_id=owner_id, text=message)
+        asyncio.run(send_message(bot, owner_id, message))
 
     for image_path in image_paths:
-        bot.send_photo(chat_id=owner_id, photo=open(image_path, "rb"))
+        asyncio.run(send_photo(bot, owner_id, open(image_path, "rb")))
 
 
 def gcal(interval: utils.TriggerInterval):
@@ -61,7 +71,7 @@ def gcal(interval: utils.TriggerInterval):
         print(f"Generated messages for {interval.value} {sport.value}: {messages}.")
 
         for message in filter(lambda x: x is not None and x != "", messages):
-            bot.send_message(chat_id=owner_id, text=message)
+            asyncio.run(send_message(bot, owner_id, message))
 
         tmpdir = setup.get_tmpdir()
         image_paths = [
@@ -73,7 +83,7 @@ def gcal(interval: utils.TriggerInterval):
         print(f"Generated images for {interval.value} {sport.value}: {image_paths}.")
 
         for image_path in filter(lambda x: x is not None, image_paths):
-            bot.send_photo(chat_id=owner_id, photo=open(image_path, "rb"))
+            asyncio.run(send_photo(bot, owner_id, open(image_path, "rb")))
 
 
 def main(request, context):

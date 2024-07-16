@@ -12,8 +12,8 @@ dependencies:
   - pre-commit
   - google-auth
   - pip
-  - pydantic>2.0
+  - pydantic>=2.0
   - git_root
   - google-api-python-client
-  - python-telegram-bot==13.11
+  - python-telegram-bot>=20.0
   - orgparse
