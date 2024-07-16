@@ -148,9 +148,11 @@ def prune_events(events):
     raw_data = [
         {
             "date_string": event["start"]["dateTime"],
-            "distance": event["description"].split("km")[0]
-            if "description" in event and "km" in event["description"]
-            else None,
+            "distance": (
+                event["description"].split("km")[0]
+                if "description" in event and "km" in event["description"]
+                else None
+            ),
             "title": event["summary"].lower(),
         }
         for event in events
