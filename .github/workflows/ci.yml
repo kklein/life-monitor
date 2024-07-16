@@ -11,14 +11,12 @@ jobs:
     - uses: pre-commit/action@v3.0.0
 
   unit-test:
-    name: "Unit tests: Python ${{ matrix.PYTHON_VERSION }}"
+    name: "Unit tests"
     runs-on: ubuntu-latest
     env:
       CI: True
     strategy:
       fail-fast: true
-      matrix:
-        PYTHON_VERSION: ['3.10']
     steps:
       - name: Checkout branch
         uses: actions/checkout@v3
@@ -26,7 +24,6 @@ jobs:
           ref: ${{ github.head_ref }}
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          python-version: ${{ matrix.PYTHON_VERSION }}
           miniforge-variant: Mambaforge
           miniforge-version: 4.11.0-2
           use-mamba: true
