@@ -14,9 +14,6 @@ dependencies:
   - pip
   - pydantic>2.0
   - git_root
-  - pip:
-      - orgparse
-      # This package is available via conda forge but sadly only
-      # a very old version thereof.
-      - google-api-python-client==2.48.0
-      - python-telegram-bot
+  - google-api-python-client==2.48.0
+  - python-telegram-bot
+  - orgparse
