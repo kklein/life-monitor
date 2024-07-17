@@ -9,8 +9,18 @@ async def send_message(bot, chat_id, message):
     await bot.send_message(chat_id=chat_id, text=message)
 
 
+async def send_messages(bot, chat_id, messages):
+    tasks = [send_message(bot, chat_id, message) for message in messages]
+    await asyncio.gather(*tasks)
+
+
 async def send_photo(bot, chat_id, photo):
     await bot.send_photo(chat_id=chat_id, photo=photo)
+
+
+async def send_photos(bot, chat_id, photos):
+    tasks = [send_photo(bot, chat_id, photo) for photo in photos]
+    await asyncio.gather(*tasks)
 
 
 def org_log(interval: utils.TriggerInterval):
@@ -33,11 +43,12 @@ def org_log(interval: utils.TriggerInterval):
     bot = setup.get_bot()
     owner_id = setup.get_telegram_owner_id()
 
-    for message in messages:
-        asyncio.run(send_message(bot, owner_id, message))
-
-    for image_path in image_paths:
-        asyncio.run(send_photo(bot, owner_id, open(image_path, "rb")))
+    asyncio.run(send_messages(bot, owner_id, messages))
+    asyncio.run(
+        send_photos(
+            bot, owner_id, (open(image_path, "rb") for image_path in image_paths)
+        )
+    )
 
 
 def gcal(interval: utils.TriggerInterval):
@@ -70,8 +81,9 @@ def gcal(interval: utils.TriggerInterval):
         ]
         print(f"Generated messages for {interval.value} {sport.value}: {messages}.")
 
-        for message in filter(lambda x: x is not None and x != "", messages):
-            asyncio.run(send_message(bot, owner_id, message))
+        messages = filter(lambda x: x is not None and x != "", messages)
+
+        asyncio.run(send_messages(bot, owner_id, messages))
 
         tmpdir = setup.get_tmpdir()
         image_paths = [
@@ -82,8 +94,13 @@ def gcal(interval: utils.TriggerInterval):
         ]
         print(f"Generated images for {interval.value} {sport.value}: {image_paths}.")
 
-        for image_path in filter(lambda x: x is not None, image_paths):
-            asyncio.run(send_photo(bot, owner_id, open(image_path, "rb")))
+        image_paths = filter(lambda x: x is not None, image_paths)
+
+        asyncio.run(
+            send_photos(
+                bot, owner_id, (open(image_path, "rb") for image_path in image_paths)
+            )
+        )
 
 
 def main(request, context):
