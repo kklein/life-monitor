@@ -44,6 +44,7 @@ def _distance_last_event(df):
 
 def _get_summary_filter(sport: utils.Sport):
     def summary_filter(event):
+        breakpoint()
         # If generic 'gym' is given, we want to select any kind of gym event.
         if sport == utils.Sport.gym:
             return "summary" in event and event["summary"].lower() in [
