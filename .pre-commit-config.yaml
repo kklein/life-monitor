@@ -15,4 +15,7 @@ repos:
     hooks:
       - id: isort-conda
         additional_dependencies: [-c, conda-forge, toml=0.10.2]
-
+  - repo: https://github.com/kklein/no-more-breakpoints
+    rev: 0.2.0
+    hooks:
+      - id: no-more-breakpoints-conda
