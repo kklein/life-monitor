@@ -10,8 +10,9 @@ async def send_message(bot, chat_id, message):
 
 
 async def send_messages(bot, chat_id, messages):
-    tasks = [send_message(bot, chat_id, message) for message in messages]
-    await asyncio.gather(*tasks)
+    async with bot:
+        tasks = [send_message(bot, chat_id, message) for message in messages]
+        await asyncio.gather(*tasks)
 
 
 async def send_photo(bot, chat_id, photo):
@@ -19,8 +20,9 @@ async def send_photo(bot, chat_id, photo):
 
 
 async def send_photos(bot, chat_id, photos):
-    tasks = [send_photo(bot, chat_id, photo) for photo in photos]
-    await asyncio.gather(*tasks)
+    async with bot:
+        tasks = [send_photo(bot, chat_id, photo) for photo in photos]
+        await asyncio.gather(*tasks)
 
 
 def org_log(interval: utils.TriggerInterval):
