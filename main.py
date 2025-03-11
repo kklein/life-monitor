@@ -2,7 +2,7 @@ import asyncio
 
 from monitoring import cal, org, setup, utils
 
-_FIRST_YEAR = 2022
+_FIRST_YEAR = 2023
 
 
 async def send_message(bot, chat_id, message):
